@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wheel of Fortune</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+    }
+    canvas {
+      border: 5px solid #333;
+      border-radius: 50%;
+      background: white;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="wheel" width="500" height="500"></canvas>
+  <button onclick="spinWheel()">Spin</button>
+
+  <script>
+    const names = ["Alexander", "Elis", "Kuba", "Kristjan", "Gummi", "Rafnar", "Valdi"];
+    const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#66BB6A"];
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const radius = canvas.width / 2;
+    let angle = 0;
+    let spinning = false;
+
+    function drawWheel() {
+      const arc = (2 * Math.PI) / names.length;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      names.forEach((name, i) => {
+        const startAngle = angle + i * arc;
+        const endAngle = startAngle + arc;
+
+        ctx.beginPath();
+        ctx.moveTo(radius, radius);
+        ctx.arc(radius, radius, radius, startAngle, endAngle);
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(radius, radius);
+        ctx.rotate(startAngle + arc / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 18px sans-serif";
+        ctx.fillText(name, radius - 10, 10);
+        ctx.restore();
+      });
+
+      // Draw arrow
+      ctx.beginPath();
+      ctx.moveTo(radius - 10, 10);
+      ctx.lineTo(radius + 10, 10);
+      ctx.lineTo(radius, 40);
+      ctx.fillStyle = "#333";
+      ctx.fill();
+    }
+
+    function spinWheel() {
+      if (spinning) return;
+      spinning = true;
+
+      const spinAngle = Math.random() * 360 + 720;
+      const duration = 4000;
+      const start = performance.now();
+      const initialAngle = angle;
+
+      function animate(time) {
+        const elapsed = time - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        angle = initialAngle + easeOut * spinAngle * Math.PI / 180;
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          const pickedIndex = names.length - Math.floor((angle % (2 * Math.PI)) / ((2 * Math.PI) / names.length)) - 1;
+          alert("Winner: " + names[pickedIndex]);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    drawWheel();
+  </script>
+</body>
+</html>
