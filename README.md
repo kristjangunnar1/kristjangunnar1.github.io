@@ -1,1 +1,1 @@
-# kristjangunnar1.github.io
+# Wheel of friends
